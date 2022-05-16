@@ -21,7 +21,7 @@ typedef enum {
     LIGHT_NOTE_LEVEL
 } light_loglevel_t;
 
-light_loglevel_t light_loglevel;
+extern light_loglevel_t light_loglevel;
 
 #define LIGHT_LOG(lvl, fp, fmt, args...)\
     if(light_loglevel >= lvl)\
