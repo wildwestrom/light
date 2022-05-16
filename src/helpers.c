@@ -9,6 +9,7 @@
 #include <errno.h> // errno
 #include <libgen.h> // dirname 
 
+light_loglevel_t light_loglevel;
 
 bool light_file_read_uint64(char const *filename, uint64_t *val)
 {
