@@ -70,7 +70,7 @@ static void _light_add_device_target(light_device_t *device, light_device_target
     device->num_targets = new_num_targets;
 }
 
-static bool light_rc_initialize(light_context_t *new_ctx) {
+static bool _light_rc_initialize(light_context_t *new_ctx) {
     // Setup the configuration folder
     // If we are root, use the system-wide configuration folder, otherwise try to find a user-specific folder, or fall back to ~/.config
     uid_t euid = geteuid();
@@ -105,7 +105,7 @@ static bool light_rc_initialize(light_context_t *new_ctx) {
 
 static void _light_get_target_path(light_context_t* ctx, char* output_path, size_t output_size)
 {
-    if (light_rc_initialize(ctx)) {
+    if (_light_rc_initialize(ctx)) {
       snprintf(output_path, output_size, "%s/targets/%s/%s/%s",
                ctx->sys_params.conf_dir,
                ctx->run_params.device_target->device->enumerator->name,
@@ -116,7 +116,7 @@ static void _light_get_target_path(light_context_t* ctx, char* output_path, size
 
 static void _light_get_target_file(light_context_t* ctx, char* output_path, size_t output_size, char const * file)
 {
-    if (light_rc_initialize(ctx)) {
+    if (_light_rc_initialize(ctx)) {
       snprintf(output_path, output_size, "%s/targets/%s/%s/%s/%s",
                ctx->sys_params.conf_dir,
                ctx->run_params.device_target->device->enumerator->name,
