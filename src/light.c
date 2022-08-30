@@ -70,27 +70,59 @@ static void _light_add_device_target(light_device_t *device, light_device_target
     device->num_targets = new_num_targets;
 }
 
+static bool light_rc_initialize(light_context_t *new_ctx) {
+    // Setup the configuration folder
+    // If we are root, use the system-wide configuration folder, otherwise try to find a user-specific folder, or fall back to ~/.config
+    uid_t euid = geteuid();
+
+    if(euid == 0)
+    {
+        snprintf(new_ctx->sys_params.conf_dir, sizeof(new_ctx->sys_params.conf_dir), "%s", "/etc/light");
+    }
+    else
+    {
+        char *xdg_conf = getenv("XDG_CONFIG_HOME");
+
+        if(xdg_conf != NULL)
+        {
+            snprintf(new_ctx->sys_params.conf_dir, sizeof(new_ctx->sys_params.conf_dir), "%s/light", xdg_conf);
+        }
+        else
+        {
+            snprintf(new_ctx->sys_params.conf_dir, sizeof(new_ctx->sys_params.conf_dir), "%s/.config/light", getenv("HOME"));
+        }
+    }
+
+    // Make sure the configuration folder exists, otherwise attempt to create it
+    int32_t rc = light_mkpath(new_ctx->sys_params.conf_dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    if(rc && errno != EEXIST)
+    {
+        LIGHT_WARN("couldn't create configuration directory");
+        return false;
+    }
+    return true;
+}
+
 static void _light_get_target_path(light_context_t* ctx, char* output_path, size_t output_size)
 {
-    snprintf(output_path, output_size,
-                "%s/targets/%s/%s/%s",
-                ctx->sys_params.conf_dir,
-                ctx->run_params.device_target->device->enumerator->name,
-                ctx->run_params.device_target->device->name,
-                ctx->run_params.device_target->name
-            );
+    if (light_rc_initialize(ctx)) {
+      snprintf(output_path, output_size, "%s/targets/%s/%s/%s",
+               ctx->sys_params.conf_dir,
+               ctx->run_params.device_target->device->enumerator->name,
+               ctx->run_params.device_target->device->name,
+               ctx->run_params.device_target->name);
+    }
 }
 
 static void _light_get_target_file(light_context_t* ctx, char* output_path, size_t output_size, char const * file)
 {
-    snprintf(output_path, output_size,
-                "%s/targets/%s/%s/%s/%s",
-                ctx->sys_params.conf_dir,
-                ctx->run_params.device_target->device->enumerator->name,
-                ctx->run_params.device_target->device->name,
-                ctx->run_params.device_target->name,
-                file
-            );
+    if (light_rc_initialize(ctx)) {
+      snprintf(output_path, output_size, "%s/targets/%s/%s/%s/%s",
+               ctx->sys_params.conf_dir,
+               ctx->run_params.device_target->device->enumerator->name,
+               ctx->run_params.device_target->device->name,
+               ctx->run_params.device_target->name, file);
+    }
 }
 
 static uint64_t _light_get_min_cap(light_context_t *ctx)
@@ -447,34 +479,6 @@ light_context_t* light_initialize(int argc, char **argv)
         }
     }
 
-    // Setup the configuration folder
-    // If we are root, use the system-wide configuration folder, otherwise try to find a user-specific folder, or fall back to ~/.config
-    if(euid == 0)
-    {
-        snprintf(new_ctx->sys_params.conf_dir, sizeof(new_ctx->sys_params.conf_dir), "%s", "/etc/light");
-    }
-    else
-    {
-        char *xdg_conf = getenv("XDG_CONFIG_HOME");
-        
-        if(xdg_conf != NULL)
-        {
-            snprintf(new_ctx->sys_params.conf_dir, sizeof(new_ctx->sys_params.conf_dir), "%s/light", xdg_conf);
-        }
-        else
-        {
-            snprintf(new_ctx->sys_params.conf_dir, sizeof(new_ctx->sys_params.conf_dir), "%s/.config/light", getenv("HOME"));
-        }
-    }
-    
-    // Make sure the configuration folder exists, otherwise attempt to create it
-    int32_t rc = light_mkpath(new_ctx->sys_params.conf_dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-    if(rc && errno != EEXIST)
-    {
-        LIGHT_WARN("couldn't create configuration directory");
-        return false;
-    }
-    
     // Create the built-in enumerators
     light_create_enumerator(new_ctx, "sysfs", &impl_sysfs_init, &impl_sysfs_free);
     light_create_enumerator(new_ctx, "util", &impl_util_init, &impl_util_free);
