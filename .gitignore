@@ -20,3 +20,5 @@ missing
 stamp-h1
 Makefile
 Makefile.in
+target/
+.cache/
