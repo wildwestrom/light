@@ -18,7 +18,6 @@ extern "C" {
         target_data: *mut libc::c_void,
     ) -> *mut light_device_target_t;
     static mut stdout: *mut FILE;
-    fn fprintf(_: *mut FILE, _: *const libc::c_char, _: ...) -> libc::c_int;
     static mut light_loglevel: light_loglevel_t;
 }
 pub type __uint64_t = libc::c_ulong;
@@ -146,12 +145,8 @@ pub unsafe extern "C" fn impl_util_dryrun_set(
     mut in_value: uint64_t,
 ) -> bool {
     if light_loglevel as libc::c_uint >= LIGHT_NOTE_LEVEL as libc::c_int as libc::c_uint {
-        fprintf(
-            stdout,
-            b"%s:%d: Notice: impl_util_dryrun_set: writing brightness %lu to utility target %s\n\0"
-                as *const u8 as *const libc::c_char,
-            b"impl/util.c\0" as *const u8 as *const libc::c_char,
-            25 as libc::c_int,
+        println!(
+            "Notice: impl_util_dryrun_set: writing brightness {} to utility target {:?}",
             in_value,
             ((*target).name).as_mut_ptr(),
         );
@@ -164,12 +159,8 @@ pub unsafe extern "C" fn impl_util_dryrun_get(
     mut out_value: *mut uint64_t,
 ) -> bool {
     if light_loglevel as libc::c_uint >= LIGHT_NOTE_LEVEL as libc::c_int as libc::c_uint {
-        fprintf(
-            stdout,
-            b"%s:%d: Notice: impl_util_dryrun_get: reading brightness (0) from utility target %s\n\0"
-                as *const u8 as *const libc::c_char,
-            b"impl/util.c\0" as *const u8 as *const libc::c_char,
-            31 as libc::c_int,
+        println!(
+            "Notice: impl_util_dryrun_get: reading brightness (0) from utility target {:?}",
             ((*target).name).as_mut_ptr(),
         );
     }
@@ -182,12 +173,8 @@ pub unsafe extern "C" fn impl_util_dryrun_getmax(
     mut out_value: *mut uint64_t,
 ) -> bool {
     if light_loglevel as libc::c_uint >= LIGHT_NOTE_LEVEL as libc::c_int as libc::c_uint {
-        fprintf(
-            stdout,
-            b"%s:%d: Notice: impl_util_dryrun_getmax: reading max. brightness (255) from utility target %s\n\0"
-                as *const u8 as *const libc::c_char,
-            b"impl/util.c\0" as *const u8 as *const libc::c_char,
-            38 as libc::c_int,
+        println!(
+            "Notice: impl_util_dryrun_getmax: reading max. brightness (255) from utility target {:?}",
             ((*target).name).as_mut_ptr(),
         );
     }
@@ -200,12 +187,8 @@ pub unsafe extern "C" fn impl_util_dryrun_command(
     mut command_string: *const libc::c_char,
 ) -> bool {
     if light_loglevel as libc::c_uint >= LIGHT_NOTE_LEVEL as libc::c_int as libc::c_uint {
-        fprintf(
-            stdout,
-            b"%s:%d: Notice: impl_util_dryrun_command: running custom command on utility target %s: \"%s\"\n\0"
-                as *const u8 as *const libc::c_char,
-            b"impl/util.c\0" as *const u8 as *const libc::c_char,
-            45 as libc::c_int,
+        println!(
+            "Notice: impl_util_dryrun_command: running custom command on utility target {:?}: \"{:?}\"",
             ((*target).name).as_mut_ptr(),
             command_string,
         );

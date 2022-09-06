@@ -18,8 +18,6 @@ extern "C" {
         _: ...
     ) -> libc::c_int;
     fn sscanf(_: *const libc::c_char, _: *const libc::c_char, _: ...) -> libc::c_int;
-    fn printf(_: *const libc::c_char, _: ...) -> libc::c_int;
-    fn fprintf(_: *mut FILE, _: *const libc::c_char, _: ...) -> libc::c_int;
     fn impl_sysfs_init(enumerator: *mut light_device_enumerator_t) -> bool;
     fn impl_sysfs_free(enumerator: *mut light_device_enumerator_t) -> bool;
     fn impl_util_init(enumerator: *mut light_device_enumerator_t) -> bool;
@@ -172,6 +170,8 @@ pub struct _light_target_path_t {
     pub target: [libc::c_char; 255],
 }
 pub type gid_t = __gid_t;
+const LIGHT_YEAR: &'static str = "2012 - 2018";
+const LIGHT_AUTHOR: &'static str = "Fredrik Haikarainen";
 unsafe extern "C" fn _light_add_enumerator_device(
     mut enumerator: *mut light_device_enumerator_t,
     mut new_device: *mut light_device_t,
@@ -261,13 +261,7 @@ unsafe extern "C" fn _light_rc_initialize(mut new_ctx: *mut light_context_t) -> 
     );
     if rc != 0 && *__errno_location() != 17 as libc::c_int {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Warning: couldn't create configuration directory\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                100 as libc::c_int,
-            );
+            eprintln!("Warning: couldn't create configuration directory");
         }
         return 0 as libc::c_int != 0;
     }
@@ -386,12 +380,7 @@ unsafe extern "C" fn _light_raw_to_percent(
     let mut max_value: uint64_t = 0 as libc::c_int as uint64_t;
     if !((*target).get_max_value).expect("non-null function pointer")(target, &mut max_value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: couldn't read from target\n\0" as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                187 as libc::c_int,
-            );
+            eprintln!("Error: couldn't read from target");
         }
         return 0 as libc::c_int != 0;
     }
@@ -408,12 +397,7 @@ unsafe extern "C" fn _light_percent_to_raw(
     let mut max_value: uint64_t = 0 as libc::c_int as uint64_t;
     if !((*target).get_max_value).expect("non-null function pointer")(target, &mut max_value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: couldn't read from target\n\0" as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                202 as libc::c_int,
-            );
+            eprintln!("Error: couldn't read from target");
         }
         return 0 as libc::c_int != 0;
     }
@@ -432,19 +416,37 @@ unsafe extern "C" fn _light_percent_to_raw(
     return 1 as libc::c_int != 0;
 }
 unsafe extern "C" fn _light_print_usage() {
-    printf(
-        b"Usage:\n  light [OPTIONS] [VALUE]\n\nCommands:\n  -H, -h      Show this help and exit\n  -V          Show program version and exit\n  -L          List available devices\n  -A          Increase brightness by value\n  -U          Decrease brightness by value\n  -T          Multiply brightness by value (can be a non-whole number, ignores raw mode)\n  -S          Set brightness to value\n  -G          Get brightness\n  -N          Set minimum brightness to value\n  -P          Get minimum brightness\n  -O          Save the current brightness\n  -I          Restore the previously saved brightness\n\nOptions:\n  -r          Interpret input and output values in raw mode (ignored for -T)\n  -s          Specify device target path to use, use -L to list available\n  -v          Specify the verbosity level (default 0)\n                 0: Values only\n                 1: Values, Errors.\n                 2: Values, Errors, Warnings.\n                 3: Values, Errors, Warnings, Notices.\n\n\0"
-            as *const u8 as *const libc::c_char,
+    println!(
+        r#"Usage: 
+  light [OPTIONS] [VALUE]
+
+Commands:"
+  -H, -h      Show this help and exit"
+  -V          Show program version and exit"
+  -L          List available devices"
+  -A          Increase brightness by value"
+  -U          Decrease brightness by value"
+  -T          Multiply brightness by value (can be a non-whole number, ignores raw mode)"
+  -S          Set brightness to value"
+  -G          Get brightness"
+  -N          Set minimum brightness to value"
+  -P          Get minimum brightness"
+  -O          Save the current brightness"
+  -I          Restore the previously saved brightness"
+
+Options:"
+  -r          Interpret input and output values in raw mode (ignored for -T)"
+  -s          Specify device target path to use, use -L to list available"
+  -v          Specify the verbosity level (default 0)"
+                 0: Values only"
+                 1: Values, Errors."
+                 2: Values, Errors, Warnings."
+                 3: Values, Errors, Warnings, Notices."
+"#
     );
-    printf(
-        b"Copyright (C) %s  %s\n\0" as *const u8 as *const libc::c_char,
-        b"2012 - 2018\0" as *const u8 as *const libc::c_char,
-        b"Fredrik Haikarainen\0" as *const u8 as *const libc::c_char,
-    );
-    printf(
-        b"This is free software, see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE\n\n\0"
-            as *const u8 as *const libc::c_char,
-    );
+    println!("Copyright (C) {}  {}", LIGHT_YEAR, LIGHT_AUTHOR);
+    println!("This is free software, see the source for copying conditions. There is NO");
+    println!("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE");
 }
 unsafe extern "C" fn _light_set_context_command(
     mut ctx: *mut light_context_t,
@@ -452,13 +454,7 @@ unsafe extern "C" fn _light_set_context_command(
 ) -> bool {
     if ((*ctx).run_params.command).is_some() {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Warning: a command was already set. ignoring.\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                256 as libc::c_int,
-            );
+            eprintln!("Warning: a command was already set. ignoring.");
         }
         return 0 as libc::c_int != 0;
     }
@@ -501,19 +497,12 @@ unsafe extern "C" fn _light_parse_arguments(
                     &mut log_level as *mut int32_t,
                 ) != 1 as libc::c_int
                 {
-                    fprintf(
-                        stderr,
-                        b"-v argument is not an integer.\n\n\0" as *const u8 as *const libc::c_char,
-                    );
+                    eprintln!("-v argument is not an integer.");
                     _light_print_usage();
                     return 0 as libc::c_int != 0;
                 }
                 if log_level < 0 as libc::c_int || log_level > 3 as libc::c_int {
-                    fprintf(
-                        stderr,
-                        b"-v argument must be between 0 and 3.\n\n\0" as *const u8
-                            as *const libc::c_char,
-                    );
+                    eprintln!("-v argument must be between 0 and 3.");
                     _light_print_usage();
                     return 0 as libc::c_int != 0;
                 }
@@ -676,19 +665,12 @@ unsafe extern "C" fn _light_parse_arguments(
             light_find_device_target(ctx, ctrl_name.as_mut_ptr());
         if curr_target.is_null() {
             if specified_target {
-                fprintf(
-                    stderr,
-                    b"We couldn't find the specified device target at the path \"%s\". Use -L to find one.\n\n\0"
-                        as *const u8 as *const libc::c_char,
-                    ctrl_name.as_mut_ptr(),
+                eprintln!("We couldn't find the specified device target at the path \"{:?}\". Use -L to find one.",
+                          ctrl_name.as_mut_ptr()
                 );
                 return 0 as libc::c_int != 0;
             } else {
-                fprintf(
-                    stderr,
-                    b"No backlight controller was found, so we could not decide an automatic target. The current command will have no effect. Please use -L to find a target and then specify it with -s.\n\n\0"
-                        as *const u8 as *const libc::c_char,
-                );
+                eprintln!("No backlight controller was found, so we could not decide an automatic target. The current command will have no effect. Please use -L to find a target and then specify it with -s.");
                 curr_target = light_find_device_target(
                     ctx,
                     b"util/test/dryrun\0" as *const u8 as *const libc::c_char,
@@ -700,11 +682,7 @@ unsafe extern "C" fn _light_parse_arguments(
     }
     if need_value as libc::c_int != 0 || need_float_value as libc::c_int != 0 {
         if argc - optind != 1 as libc::c_int {
-            fprintf(
-                stderr,
-                b"please specify a <value> for this command.\n\n\0" as *const u8
-                    as *const libc::c_char,
-            );
+            eprintln!("please specify a <value> for this command.");
             _light_print_usage();
             return 0 as libc::c_int != 0;
         }
@@ -717,10 +695,7 @@ unsafe extern "C" fn _light_parse_arguments(
                 &mut (*ctx).run_params.value as *mut uint64_t,
             ) != 1 as libc::c_int
             {
-                fprintf(
-                    stderr,
-                    b"<value> is not an integer.\n\n\0" as *const u8 as *const libc::c_char,
-                );
+                eprintln!("<value> is not an integer.");
                 _light_print_usage();
                 return 0 as libc::c_int != 0;
             }
@@ -732,10 +707,7 @@ unsafe extern "C" fn _light_parse_arguments(
                 &mut percent_value as *mut libc::c_double,
             ) != 1 as libc::c_int
             {
-                fprintf(
-                    stderr,
-                    b"<value> is not a decimal.\n\n\0" as *const u8 as *const libc::c_char,
-                );
+                eprintln!("<value> is not a decomal.");
                 _light_print_usage();
                 return 0 as libc::c_int != 0;
             }
@@ -749,13 +721,7 @@ unsafe extern "C" fn _light_parse_arguments(
                 if light_loglevel as libc::c_uint
                     >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint
                 {
-                    fprintf(
-                        stderr,
-                        b"%s:%d: Error: failed to convert from percent to raw for device target\n\0"
-                            as *const u8 as *const libc::c_char,
-                        b"light.c\0" as *const u8 as *const libc::c_char,
-                        427 as libc::c_int,
-                    );
+                    eprintln!("Error: failed to convert from percent to raw for device target");
                 }
                 return 0 as libc::c_int != 0;
             }
@@ -769,10 +735,7 @@ unsafe extern "C" fn _light_parse_arguments(
             &mut (*ctx).run_params.float_value as *mut libc::c_float,
         ) != 1 as libc::c_int
         {
-            fprintf(
-                stderr,
-                b"<value> is not a float.\n\n\0" as *const u8 as *const libc::c_char,
-            );
+            eprintln!("<value> is not a float.");
             _light_print_usage();
             return 0 as libc::c_int != 0;
         }
@@ -804,16 +767,8 @@ pub unsafe extern "C" fn light_initialize(
     {
         if setegid(euid) < 0 as libc::c_int {
             if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-                fprintf(
-                    stderr,
-                    b"%s:%d: Error: could not change egid from %u to %u (uid: %u, euid: %u)\n\0"
-                        as *const u8 as *const libc::c_char,
-                    b"light.c\0" as *const u8 as *const libc::c_char,
-                    477 as libc::c_int,
-                    egid,
-                    euid,
-                    uid,
-                    euid,
+                eprintln!(
+                    "Error: could not change egid from {egid} to {euid} (uid: {uid}, euid: {euid})"
                 );
             }
             return 0 as *mut light_context_t;
@@ -839,23 +794,12 @@ pub unsafe extern "C" fn light_initialize(
     );
     if !light_init_enumerators(new_ctx) {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Warning: failed to initialize all enumerators\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                494 as libc::c_int,
-            );
+            eprintln!("Warning: failed to initialize all enumerators");
         }
     }
     if !_light_parse_arguments(new_ctx, argc, argv) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to parse arguments\n\0" as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                500 as libc::c_int,
-            );
+            eprintln!("Error: failed to parse arguments");
         }
         return 0 as *mut light_context_t;
     }
@@ -865,13 +809,7 @@ pub unsafe extern "C" fn light_initialize(
 pub unsafe extern "C" fn light_execute(mut ctx: *mut light_context_t) -> bool {
     if ((*ctx).run_params.command).is_none() {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: run parameters command was null, can't execute\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                511 as libc::c_int,
-            );
+            eprintln!("Error: run parameters command was null, can't execute");
         }
         return 0 as libc::c_int != 0;
     }
@@ -881,13 +819,7 @@ pub unsafe extern "C" fn light_execute(mut ctx: *mut light_context_t) -> bool {
 pub unsafe extern "C" fn light_free(mut ctx: *mut light_context_t) {
     if !light_free_enumerators(ctx) {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Warning: failed to free all enumerators\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                522 as libc::c_int,
-            );
+            eprintln!("Warning: failed to free all enumerators");
         }
     }
     free(ctx as *mut libc::c_void);
@@ -990,13 +922,7 @@ pub unsafe extern "C" fn light_split_target_path(
     let mut end: *const libc::c_char = strstr(begin, b"/\0" as *const u8 as *const libc::c_char);
     if end.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Warning: invalid path passed to split_target_path\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                618 as libc::c_int,
-            );
+            eprintln!("Warning: invalid path passed to split_target_path");
         }
         return 0 as libc::c_int != 0;
     }
@@ -1007,13 +933,7 @@ pub unsafe extern "C" fn light_split_target_path(
     end = strstr(begin, b"/\0" as *const u8 as *const libc::c_char);
     if end.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Warning: invalid path passed to split_target_path\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                630 as libc::c_int,
-            );
+            eprintln!("Warning: invalid path passed to split_target_path");
         }
         return 0 as libc::c_int != 0;
     }
@@ -1038,13 +958,9 @@ pub unsafe extern "C" fn light_find_device_target(
     };
     if !light_split_target_path(name, &mut new_path) {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Warning: light_find_device_target needs a path in the format of \"enumerator/device/target\", the following format is not recognized:  \"%s\"\n\0"
-                    as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                648 as libc::c_int,
-                name,
+            eprintln!(
+                "Warning: light_find_device_target needs a path in the format of \"enumerator/device/target\", the following format is not recognized:  \"{:?}\"",
+                    name,
             );
         }
         return 0 as *mut light_device_target_t;
@@ -1053,12 +969,8 @@ pub unsafe extern "C" fn light_find_device_target(
         _light_find_enumerator(ctx, (new_path.enumerator).as_mut_ptr());
     if enumerator.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Warning: no such enumerator, \"%s\"\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                665 as libc::c_int,
+            eprintln!(
+                "Warning: no such enumerator, \"{:?}\"",
                 (new_path.enumerator).as_mut_ptr(),
             );
         }
@@ -1068,11 +980,8 @@ pub unsafe extern "C" fn light_find_device_target(
         _light_find_device(enumerator, (new_path.device).as_mut_ptr());
     if device.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Warning: no such device, \"%s\"\n\0" as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                672 as libc::c_int,
+            eprintln!(
+                "Warning: no such device, \"{:?}\"",
                 (new_path.device).as_mut_ptr(),
             );
         }
@@ -1082,11 +991,8 @@ pub unsafe extern "C" fn light_find_device_target(
         _light_find_target(device, (new_path.target).as_mut_ptr());
     if target.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Warning: no such target, \"%s\"\n\0" as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                679 as libc::c_int,
+            eprintln!(
+                "Warning: no such target, \"{:?}\"",
                 (new_path.target).as_mut_ptr(),
             );
         }
@@ -1101,15 +1007,12 @@ pub unsafe extern "C" fn light_cmd_print_help(mut ctx: *mut light_context_t) -> 
 }
 #[no_mangle]
 pub unsafe extern "C" fn light_cmd_print_version(mut ctx: *mut light_context_t) -> bool {
-    printf(
-        b"v%s\n\0" as *const u8 as *const libc::c_char,
-        b"1.2\0" as *const u8 as *const libc::c_char,
-    );
+    println!("v{}", "1.2");
     return 1 as libc::c_int != 0;
 }
 #[no_mangle]
 pub unsafe extern "C" fn light_cmd_list_devices(mut ctx: *mut light_context_t) -> bool {
-    printf(b"Listing device targets:\n\0" as *const u8 as *const libc::c_char);
+    println!("Listing device targets:");
     let mut enumerator: uint64_t = 0 as libc::c_int as uint64_t;
     while enumerator < (*ctx).num_enumerators {
         let mut curr_enumerator: *mut light_device_enumerator_t =
@@ -1122,8 +1025,8 @@ pub unsafe extern "C" fn light_cmd_list_devices(mut ctx: *mut light_context_t) -
             while target < (*curr_device).num_targets {
                 let mut curr_target: *mut light_device_target_t =
                     *((*curr_device).targets).offset(target as isize);
-                printf(
-                    b"\t%s/%s/%s\n\0" as *const u8 as *const libc::c_char,
+                println!(
+                    "\t{:?}/{:?}/{:?}",
                     ((*curr_enumerator).name).as_mut_ptr(),
                     ((*curr_device).name).as_mut_ptr(),
                     ((*curr_target).name).as_mut_ptr(),
@@ -1141,13 +1044,7 @@ pub unsafe extern "C" fn light_cmd_set_brightness(mut ctx: *mut light_context_t)
     let mut target: *mut light_device_target_t = (*ctx).run_params.device_target;
     if target.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: didn't have a valid target, programmer mistake\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                724 as libc::c_int,
-            );
+            eprintln!("Error: didn't have a valid target, programmer mistake");
         }
         return 0 as libc::c_int != 0;
     }
@@ -1158,12 +1055,7 @@ pub unsafe extern "C" fn light_cmd_set_brightness(mut ctx: *mut light_context_t)
     }
     if !((*target).set_value).expect("non-null function pointer")(target, value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to write to target\n\0" as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                738 as libc::c_int,
-            );
+            eprintln!("Error: failed to write to target");
         }
         return 0 as libc::c_int != 0;
     }
@@ -1174,45 +1066,28 @@ pub unsafe extern "C" fn light_cmd_get_brightness(mut ctx: *mut light_context_t)
     let mut target: *mut light_device_target_t = (*ctx).run_params.device_target;
     if target.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: didn't have a valid target, programmer mistake\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                750 as libc::c_int,
-            );
+            eprintln!("Error: didn't have a valid target, programmer mistake")
         }
         return 0 as libc::c_int != 0;
     }
     let mut value: uint64_t = 0 as libc::c_int as uint64_t;
     if !((*target).get_value).expect("non-null function pointer")(target, &mut value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to read from target\n\0" as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                757 as libc::c_int,
-            );
+            eprintln!("Error: failed to read from target")
         }
         return 0 as libc::c_int != 0;
     }
     if (*ctx).run_params.raw_mode {
-        printf(b"%lu\n\0" as *const u8 as *const libc::c_char, value);
+        println!("{}", value);
     } else {
         let mut percent: libc::c_double = 0.0f64;
         if !_light_raw_to_percent(target, value, &mut percent) {
             if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-                fprintf(
-                    stderr,
-                    b"%s:%d: Error: failed to convert from raw to percent from device target\n\0"
-                        as *const u8 as *const libc::c_char,
-                    b"light.c\0" as *const u8 as *const libc::c_char,
-                    770 as libc::c_int,
-                );
+                eprintln!("Error: failed to convert from raw to percent from device target")
             }
             return 0 as libc::c_int != 0;
         }
-        printf(b"%.2f\n\0" as *const u8 as *const libc::c_char, percent);
+        println!("{:.2}", percent);
     }
     return 1 as libc::c_int != 0;
 }
@@ -1221,34 +1096,22 @@ pub unsafe extern "C" fn light_cmd_get_max_brightness(mut ctx: *mut light_contex
     let mut target: *mut light_device_target_t = (*ctx).run_params.device_target;
     if target.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: didn't have a valid target, programmer mistake\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                784 as libc::c_int,
-            );
+            eprintln!("Error: didn't have a valid target, programmer mistake");
         }
         return 0 as libc::c_int != 0;
     }
     if !(*ctx).run_params.raw_mode {
-        printf(b"100.0\n\0" as *const u8 as *const libc::c_char);
+        println!("100.0");
         return 1 as libc::c_int != 0;
     }
     let mut max_value: uint64_t = 0 as libc::c_int as uint64_t;
     if !((*target).get_max_value).expect("non-null function pointer")(target, &mut max_value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to read from device target\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                797 as libc::c_int,
-            );
+            eprintln!("Error: failed to read from device target");
         }
         return 0 as libc::c_int != 0;
     }
-    printf(b"%lu\n\0" as *const u8 as *const libc::c_char, max_value);
+    println!("{}", max_value);
     return 1 as libc::c_int != 0;
 }
 #[no_mangle]
@@ -1271,13 +1134,7 @@ pub unsafe extern "C" fn light_cmd_set_min_brightness(mut ctx: *mut light_contex
     );
     if rc != 0 && *__errno_location() != 17 as libc::c_int {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: couldn't create target directory for minimum brightness\n\0"
-                    as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                814 as libc::c_int,
-            );
+            eprintln!("Error: couldn't create target directory for minimum brightness");
         }
         return 0 as libc::c_int != 0;
     }
@@ -1290,13 +1147,7 @@ pub unsafe extern "C" fn light_cmd_set_min_brightness(mut ctx: *mut light_contex
     );
     if !light_file_write_uint64(target_filepath.as_mut_ptr(), (*ctx).run_params.value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: couldn't write value to minimum file\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                823 as libc::c_int,
-            );
+            eprintln!("Error: couldn't write value to minimum file");
         }
         return 0 as libc::c_int != 0;
     }
@@ -1314,17 +1165,14 @@ pub unsafe extern "C" fn light_cmd_get_min_brightness(mut ctx: *mut light_contex
     let mut minimum_value: uint64_t = 0 as libc::c_int as uint64_t;
     if !light_file_read_uint64(target_path.as_mut_ptr(), &mut minimum_value) {
         if (*ctx).run_params.raw_mode {
-            printf(b"0\n\0" as *const u8 as *const libc::c_char);
+            println!("0");
         } else {
-            printf(b"0.00\n\0" as *const u8 as *const libc::c_char);
+            println!("0.00");
         }
         return 1 as libc::c_int != 0;
     }
     if (*ctx).run_params.raw_mode {
-        printf(
-            b"%lu\n\0" as *const u8 as *const libc::c_char,
-            minimum_value,
-        );
+        println!("{}", minimum_value);
     } else {
         let mut minimum_d: libc::c_double = 0.0f64;
         if !_light_raw_to_percent(
@@ -1333,17 +1181,11 @@ pub unsafe extern "C" fn light_cmd_get_min_brightness(mut ctx: *mut light_contex
             &mut minimum_d,
         ) {
             if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-                fprintf(
-                    stderr,
-                    b"%s:%d: Error: failed to convert value from raw to percent for device target\n\0"
-                        as *const u8 as *const libc::c_char,
-                    b"light.c\0" as *const u8 as *const libc::c_char,
-                    859 as libc::c_int,
-                );
+                eprintln!("Error: failed to convert value from raw to percent for device target");
             }
             return 0 as libc::c_int != 0;
         }
-        printf(b"%.2f\n\0" as *const u8 as *const libc::c_char, minimum_d);
+        println!("{}", minimum_d);
     }
     return 1 as libc::c_int != 0;
 }
@@ -1352,37 +1194,21 @@ pub unsafe extern "C" fn light_cmd_add_brightness(mut ctx: *mut light_context_t)
     let mut target: *mut light_device_target_t = (*ctx).run_params.device_target;
     if target.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: didn't have a valid target, programmer mistake\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                874 as libc::c_int,
-            );
+            eprintln!("Error: didn't have a valid target, programmer mistake");
         }
         return 0 as libc::c_int != 0;
     }
     let mut value: uint64_t = 0 as libc::c_int as uint64_t;
     if !((*target).get_value).expect("non-null function pointer")(target, &mut value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to read from target\n\0" as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                881 as libc::c_int,
-            );
+            eprintln!("Error: failed to read from target");
         }
         return 0 as libc::c_int != 0;
     }
     let mut max_value: uint64_t = 0 as libc::c_int as uint64_t;
     if !((*target).get_max_value).expect("non-null function pointer")(target, &mut max_value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to read from target\n\0" as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                888 as libc::c_int,
-            );
+            eprintln!("Error: failed to read from target");
         }
         return 0 as libc::c_int != 0;
     }
@@ -1396,12 +1222,7 @@ pub unsafe extern "C" fn light_cmd_add_brightness(mut ctx: *mut light_context_t)
     }
     if !((*target).set_value).expect("non-null function pointer")(target, value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to write to target\n\0" as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                908 as libc::c_int,
-            );
+            eprintln!("Error: failed to write to target");
         }
         return 0 as libc::c_int != 0;
     }
@@ -1412,25 +1233,14 @@ pub unsafe extern "C" fn light_cmd_sub_brightness(mut ctx: *mut light_context_t)
     let mut target: *mut light_device_target_t = (*ctx).run_params.device_target;
     if target.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: didn't have a valid target, programmer mistake\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                920 as libc::c_int,
-            );
+            eprintln!("Error: didn't have a valid target, programmer mistake");
         }
         return 0 as libc::c_int != 0;
     }
     let mut value: uint64_t = 0 as libc::c_int as uint64_t;
     if !((*target).get_value).expect("non-null function pointer")(target, &mut value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to read from target\n\0" as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                927 as libc::c_int,
-            );
+            eprintln!("Error: failed to read from target");
         }
         return 0 as libc::c_int != 0;
     }
@@ -1446,12 +1256,7 @@ pub unsafe extern "C" fn light_cmd_sub_brightness(mut ctx: *mut light_context_t)
     }
     if !((*target).set_value).expect("non-null function pointer")(target, value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to write to target\n\0" as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                948 as libc::c_int,
-            );
+            eprintln!("Error: failed to write to target");
         }
         return 0 as libc::c_int != 0;
     }
@@ -1462,37 +1267,21 @@ pub unsafe extern "C" fn light_cmd_mul_brightness(mut ctx: *mut light_context_t)
     let mut target: *mut light_device_target_t = (*ctx).run_params.device_target;
     if target.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: didn't have a valid target, programmer mistake\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                960 as libc::c_int,
-            );
+            eprintln!("Error: didn't have a valid target, programmer mistake");
         }
         return 0 as libc::c_int != 0;
     }
     let mut value: uint64_t = 0 as libc::c_int as uint64_t;
     if !((*target).get_value).expect("non-null function pointer")(target, &mut value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to read from target\n\0" as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                967 as libc::c_int,
-            );
+            eprintln!("Error: failed to read from target");
         }
         return 0 as libc::c_int != 0;
     }
     let mut max_value: uint64_t = 0 as libc::c_int as uint64_t;
     if !((*target).get_max_value).expect("non-null function pointer")(target, &mut max_value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to read from target\n\0" as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                974 as libc::c_int,
-            );
+            eprintln!("Error: failed to read from target");
         }
         return 0 as libc::c_int != 0;
     }
@@ -1517,12 +1306,7 @@ pub unsafe extern "C" fn light_cmd_mul_brightness(mut ctx: *mut light_context_t)
     }
     if !((*target).set_value).expect("non-null function pointer")(target, value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to write to target\n\0" as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                1003 as libc::c_int,
-            );
+            eprintln!("Error: failed to write to target");
         }
         return 0 as libc::c_int != 0;
     }
@@ -1548,13 +1332,7 @@ pub unsafe extern "C" fn light_cmd_save_brightness(mut ctx: *mut light_context_t
     );
     if rc != 0 && *__errno_location() != 17 as libc::c_int {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: couldn't create target directory for save brightness\n\0"
-                    as *const u8 as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                1019 as libc::c_int,
-            );
+            eprintln!("Error: couldn't create target directory for save brightness");
         }
         return 0 as libc::c_int != 0;
     }
@@ -1571,25 +1349,13 @@ pub unsafe extern "C" fn light_cmd_save_brightness(mut ctx: *mut light_context_t
         &mut curr_value,
     ) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: couldn't read from device target\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                1029 as libc::c_int,
-            );
+            eprintln!("Error: couldn't read from device target");
         }
         return 0 as libc::c_int != 0;
     }
     if !light_file_write_uint64(target_filepath.as_mut_ptr(), curr_value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: couldn't write value to savefile\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                1035 as libc::c_int,
-            );
+            eprintln!("Error: couldn't write value to savefile");
         }
         return 0 as libc::c_int != 0;
     }
@@ -1607,13 +1373,7 @@ pub unsafe extern "C" fn light_cmd_restore_brightness(mut ctx: *mut light_contex
     let mut saved_value: uint64_t = 0 as libc::c_int as uint64_t;
     if !light_file_read_uint64(target_path.as_mut_ptr(), &mut saved_value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: couldn't read value from savefile\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                1050 as libc::c_int,
-            );
+            eprintln!("Error: couldn't read value from savefile");
         }
         return 0 as libc::c_int != 0;
     }
@@ -1626,13 +1386,7 @@ pub unsafe extern "C" fn light_cmd_restore_brightness(mut ctx: *mut light_contex
         saved_value,
     ) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: couldn't write saved value to device target\n\0" as *const u8
-                    as *const libc::c_char,
-                b"light.c\0" as *const u8 as *const libc::c_char,
-                1062 as libc::c_int,
-            );
+            eprintln!("Error: couldn't write saved value to device target");
         }
         return 0 as libc::c_int != 0;
     }

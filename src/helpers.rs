@@ -109,23 +109,10 @@ pub unsafe extern "C" fn light_file_read_uint64(
     fp = fopen(filename, b"r\0" as *const u8 as *const libc::c_char);
     if fp.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: could not open '%s' for reading\n\0" as *const u8
-                    as *const libc::c_char,
-                b"helpers.c\0" as *const u8 as *const libc::c_char,
-                22 as libc::c_int,
-                filename,
-            );
+            eprintln!("Error: could not open '{:?}' for reading", filename,);
         }
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: Verify it exists with the right permissions\n\0" as *const u8
-                    as *const libc::c_char,
-                b"helpers.c\0" as *const u8 as *const libc::c_char,
-                22 as libc::c_int,
-            );
+            eprintln!("Error: Verify it exists with the right permissions");
         }
         return 0 as libc::c_int != 0;
     }
@@ -136,14 +123,7 @@ pub unsafe extern "C" fn light_file_read_uint64(
     ) != 1 as libc::c_int
     {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: Couldn't parse an unsigned integer from '%s'\n\0" as *const u8
-                    as *const libc::c_char,
-                b"helpers.c\0" as *const u8 as *const libc::c_char,
-                28 as libc::c_int,
-                filename,
-            );
+            eprintln!("Couldn't parse an unsigned integer from {:?}", filename);
         }
         fclose(fp);
         return 0 as libc::c_int != 0;
@@ -161,34 +141,16 @@ pub unsafe extern "C" fn light_file_write_uint64(
     fp = fopen(filename, b"w\0" as *const u8 as *const libc::c_char);
     if fp.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: could not open '%s' for writing\n\0" as *const u8
-                    as *const libc::c_char,
-                b"helpers.c\0" as *const u8 as *const libc::c_char,
-                46 as libc::c_int,
-                filename,
-            );
+            eprintln!("Error: could not open '{:?}' for writing", filename,);
         }
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: Verify it exists with the right permissions\n\0" as *const u8
-                    as *const libc::c_char,
-                b"helpers.c\0" as *const u8 as *const libc::c_char,
-                46 as libc::c_int,
-            );
+            eprintln!("Error: Verify it exists with the right permissions");
         }
         return 0 as libc::c_int != 0;
     }
     if fprintf(fp, b"%lu\0" as *const u8 as *const libc::c_char, val) < 0 as libc::c_int {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: fprintf failed\n\0" as *const u8 as *const libc::c_char,
-                b"helpers.c\0" as *const u8 as *const libc::c_char,
-                52 as libc::c_int,
-            );
+            eprintln!("Error: fprintf failed")
         }
         fclose(fp);
         return 0 as libc::c_int != 0;
@@ -206,23 +168,10 @@ pub unsafe extern "C" fn light_file_is_writable(mut filename: *const libc::c_cha
     fp = fopen(filename, b"r+\0" as *const u8 as *const libc::c_char);
     if fp.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Warning: could not open '%s' for writing\n\0" as *const u8
-                    as *const libc::c_char,
-                b"helpers.c\0" as *const u8 as *const libc::c_char,
-                74 as libc::c_int,
-                filename,
-            );
+            eprintln!("Warning: could not open '{:?}' for writing", filename)
         }
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Warning: Verify it exists with the right permissions\n\0" as *const u8
-                    as *const libc::c_char,
-                b"helpers.c\0" as *const u8 as *const libc::c_char,
-                74 as libc::c_int,
-            );
+            eprintln!("Error: Verify it exists with the right permissions");
         }
         return 0 as libc::c_int != 0;
     }
@@ -235,23 +184,10 @@ pub unsafe extern "C" fn light_file_is_readable(mut filename: *const libc::c_cha
     fp = fopen(filename, b"r\0" as *const u8 as *const libc::c_char);
     if fp.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Warning: could not open '%s' for reading\n\0" as *const u8
-                    as *const libc::c_char,
-                b"helpers.c\0" as *const u8 as *const libc::c_char,
-                90 as libc::c_int,
-                filename,
-            );
+            eprintln!("Warning: could not open '{:?}' for reading", filename)
         }
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Warning: Verify it exists with the right permissions\n\0" as *const u8
-                    as *const libc::c_char,
-                b"helpers.c\0" as *const u8 as *const libc::c_char,
-                90 as libc::c_int,
-            );
+            eprintln!("Error: Verify it exists with the right permissions");
         }
         return 0 as libc::c_int != 0;
     }
@@ -261,12 +197,8 @@ pub unsafe extern "C" fn light_file_is_readable(mut filename: *const libc::c_cha
 #[no_mangle]
 pub unsafe extern "C" fn light_log_clamp_min(mut min: uint64_t) -> uint64_t {
     if light_loglevel as libc::c_uint >= LIGHT_NOTE_LEVEL as libc::c_int as libc::c_uint {
-        fprintf(
-            stdout,
-            b"%s:%d: Notice: too small value, adjusting to minimum %lu (raw)\n\0" as *const u8
-                as *const libc::c_char,
-            b"helpers.c\0" as *const u8 as *const libc::c_char,
-            101 as libc::c_int,
+        println!(
+            "Notice: too small value, adjusting to minimum {:?} (raw)",
             min,
         );
     }
@@ -275,12 +207,8 @@ pub unsafe extern "C" fn light_log_clamp_min(mut min: uint64_t) -> uint64_t {
 #[no_mangle]
 pub unsafe extern "C" fn light_log_clamp_max(mut max: uint64_t) -> uint64_t {
     if light_loglevel as libc::c_uint >= LIGHT_NOTE_LEVEL as libc::c_int as libc::c_uint {
-        fprintf(
-            stdout,
-            b"%s:%d: Notice: too large value, adjusting to maximum %lu (raw)\n\0" as *const u8
-                as *const libc::c_char,
-            b"helpers.c\0" as *const u8 as *const libc::c_char,
-            108 as libc::c_int,
+        println!(
+            "Notice: too large value, adjusting to maximum {:?} (raw)",
             max,
         );
     }
@@ -290,12 +218,8 @@ pub unsafe extern "C" fn light_log_clamp_max(mut max: uint64_t) -> uint64_t {
 pub unsafe extern "C" fn light_percent_clamp(mut val: libc::c_double) -> libc::c_double {
     if val < 0.0f64 {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Warning: specified value %g%% is not valid, adjusting it to 0%%\n\0"
-                    as *const u8 as *const libc::c_char,
-                b"helpers.c\0" as *const u8 as *const libc::c_char,
-                117 as libc::c_int,
+            eprintln!(
+                "Warning: specified value {:?}% is not valid, adjusting it to 0%",
                 val,
             );
         }
@@ -303,12 +227,8 @@ pub unsafe extern "C" fn light_percent_clamp(mut val: libc::c_double) -> libc::c
     }
     if val > 100.0f64 {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Warning: specified value %g%% is not valid, adjusting it to 100%%\n\0"
-                    as *const u8 as *const libc::c_char,
-                b"helpers.c\0" as *const u8 as *const libc::c_char,
-                123 as libc::c_int,
+            eprintln!(
+                "Warning: specified value {:?}% is not valid, adjusting it to 100%",
                 val,
             );
         }

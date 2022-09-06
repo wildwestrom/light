@@ -19,7 +19,6 @@ extern "C" {
     fn light_free(_: *mut light_context_t);
     static mut stderr: *mut FILE;
     static mut light_loglevel: light_loglevel_t;
-    fn fprintf(_: *mut FILE, _: *const libc::c_char, _: ...) -> libc::c_int;
 }
 pub type __uint64_t = libc::c_ulong;
 pub type __off_t = libc::c_long;
@@ -126,31 +125,23 @@ pub struct _IO_FILE {
 }
 pub type _IO_lock_t = ();
 pub type FILE = _IO_FILE;
-pub type light_loglevel_t = libc::c_uint;
-pub const LIGHT_NOTE_LEVEL: light_loglevel_t = 3;
-pub const LIGHT_WARN_LEVEL: light_loglevel_t = 2;
-pub const LIGHT_ERROR_LEVEL: light_loglevel_t = 1;
+pub type light_loglevel_t = u32;
+pub const LIGHT_NOTE_LEVEL: u32 = 3;
+pub const LIGHT_WARN_LEVEL: u32 = 2;
+pub const LIGHT_ERROR_LEVEL: u32 = 1;
 unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> libc::c_int {
     let mut light_ctx: *mut light_context_t = light_initialize(argc, argv);
     if light_ctx.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: Initialization failed\n\0" as *const u8 as *const libc::c_char,
-                b"main.c\0" as *const u8 as *const libc::c_char,
-                15 as libc::c_int,
-            );
+            eprintln!("Error: Initialization failed")
         }
         return 2 as libc::c_int;
     }
     if !light_execute(light_ctx) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: Execution failed\n\0" as *const u8 as *const libc::c_char,
-                b"main.c\0" as *const u8 as *const libc::c_char,
-                20 as libc::c_int,
-            );
+            {
+                eprintln!("Error: Execution failed")
+            }
         }
         light_free(light_ctx);
         return 1 as libc::c_int;

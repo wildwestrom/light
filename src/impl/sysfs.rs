@@ -19,7 +19,6 @@ extern "C" {
         target_data: *mut libc::c_void,
     ) -> *mut light_device_target_t;
     static mut stderr: *mut FILE;
-    fn fprintf(_: *mut FILE, _: *const libc::c_char, _: ...) -> libc::c_int;
     fn snprintf(
         _: *mut libc::c_char,
         _: libc::c_ulong,
@@ -148,13 +147,7 @@ unsafe extern "C" fn _impl_sysfs_init_leds(mut enumerator: *mut light_device_enu
     leds_dir = opendir(b"/sys/class/leds\0" as *const u8 as *const libc::c_char);
     if leds_dir.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to open leds controller directory for reading\n\0"
-                    as *const u8 as *const libc::c_char,
-                b"impl/sysfs.c\0" as *const u8 as *const libc::c_char,
-                21 as libc::c_int,
-            );
+            eprintln!("Error: failed to open leds controller directory for reading");
         }
         return 0 as libc::c_int != 0;
     }
@@ -224,13 +217,7 @@ unsafe extern "C" fn _impl_sysfs_init_backlight(
     backlight_dir = opendir(b"/sys/class/backlight\0" as *const u8 as *const libc::c_char);
     if backlight_dir.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to open backlight controller directory for reading\n\0"
-                    as *const u8 as *const libc::c_char,
-                b"impl/sysfs.c\0" as *const u8 as *const libc::c_char,
-                62 as libc::c_int,
-            );
+            eprintln!("Error: failed to open backlight controller directory for reading");
         }
         return 0 as libc::c_int != 0;
     }
@@ -356,13 +343,7 @@ pub unsafe extern "C" fn impl_sysfs_set(
     let mut data: *mut impl_sysfs_data_t = (*target).device_target_data as *mut impl_sysfs_data_t;
     if !light_file_write_uint64(((*data).brightness).as_mut_ptr(), in_value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to write to sysfs device\n\0" as *const u8
-                    as *const libc::c_char,
-                b"impl/sysfs.c\0" as *const u8 as *const libc::c_char,
-                133 as libc::c_int,
-            );
+            eprintln!("Error: failed to write to sysfs device");
         }
         return 0 as libc::c_int != 0;
     }
@@ -376,13 +357,7 @@ pub unsafe extern "C" fn impl_sysfs_get(
     let mut data: *mut impl_sysfs_data_t = (*target).device_target_data as *mut impl_sysfs_data_t;
     if !light_file_read_uint64(((*data).brightness).as_mut_ptr(), out_value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to read from sysfs device\n\0" as *const u8
-                    as *const libc::c_char,
-                b"impl/sysfs.c\0" as *const u8 as *const libc::c_char,
-                146 as libc::c_int,
-            );
+            eprintln!("Error: failed to read from sysfs device");
         }
         return 0 as libc::c_int != 0;
     }
@@ -396,13 +371,7 @@ pub unsafe extern "C" fn impl_sysfs_getmax(
     let mut data: *mut impl_sysfs_data_t = (*target).device_target_data as *mut impl_sysfs_data_t;
     if !light_file_read_uint64(((*data).max_brightness).as_mut_ptr(), out_value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to read from sysfs device\n\0" as *const u8
-                    as *const libc::c_char,
-                b"impl/sysfs.c\0" as *const u8 as *const libc::c_char,
-                159 as libc::c_int,
-            );
+            eprintln!("Error: failed to read from sysfs device");
         }
         return 0 as libc::c_int != 0;
     }

@@ -19,7 +19,6 @@ extern "C" {
         target_data: *mut libc::c_void,
     ) -> *mut light_device_target_t;
     static mut stderr: *mut FILE;
-    fn fprintf(_: *mut FILE, _: *const libc::c_char, _: ...) -> libc::c_int;
     static mut light_loglevel: light_loglevel_t;
     fn light_file_read_uint64(filename: *const libc::c_char, val: *mut uint64_t) -> bool;
     fn light_file_write_uint64(filename: *const libc::c_char, val: uint64_t) -> bool;
@@ -183,12 +182,8 @@ unsafe extern "C" fn _impl_razer_add_target(
         );
     } else {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Warning: razer: couldn't add target %s to device %s, the file %s doesn't exist\n\0"
-                    as *const u8 as *const libc::c_char,
-                b"impl/razer.c\0" as *const u8 as *const libc::c_char,
-                23 as libc::c_int,
+            eprintln!(
+                "Warning: razer: couldn't add target {:?} to device {:?}, the file {:?} doesn't exist",
                 name,
                 ((*device).name).as_mut_ptr(),
                 filename,
@@ -279,13 +274,7 @@ pub unsafe extern "C" fn impl_razer_set(
     let mut data: *mut impl_razer_data_t = (*target).device_target_data as *mut impl_razer_data_t;
     if !light_file_write_uint64(((*data).brightness).as_mut_ptr(), in_value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to write to razer device\n\0" as *const u8
-                    as *const libc::c_char,
-                b"impl/razer.c\0" as *const u8 as *const libc::c_char,
-                85 as libc::c_int,
-            );
+            eprintln!("Error: failed to write to razer device",);
         }
         return 0 as libc::c_int != 0;
     }
@@ -299,13 +288,7 @@ pub unsafe extern "C" fn impl_razer_get(
     let mut data: *mut impl_razer_data_t = (*target).device_target_data as *mut impl_razer_data_t;
     if !light_file_read_uint64(((*data).brightness).as_mut_ptr(), out_value) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            fprintf(
-                stderr,
-                b"%s:%d: Error: failed to read from razer device\n\0" as *const u8
-                    as *const libc::c_char,
-                b"impl/razer.c\0" as *const u8 as *const libc::c_char,
-                98 as libc::c_int,
-            );
+            eprintln!("Error: failed to read from razer device",);
         }
         return 0 as libc::c_int != 0;
     }
