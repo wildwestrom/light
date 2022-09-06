@@ -139,9 +139,7 @@ unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> lib
     }
     if !light_execute(light_ctx) {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
-            {
-                eprintln!("Error: Execution failed")
-            }
+            eprintln!("Error: Execution failed")
         }
         light_free(light_ctx);
         return 1 as libc::c_int;
