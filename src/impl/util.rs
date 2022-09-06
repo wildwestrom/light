@@ -57,25 +57,16 @@ pub struct _light_device_enumerator_t {
     pub devices: *mut *mut light_device_t,
     pub num_devices: uint64_t,
 }
-pub type LFUNCENUMFREE = Option::<
-    unsafe extern "C" fn(*mut light_device_enumerator_t) -> bool,
->;
-pub type LFUNCENUMINIT = Option::<
-    unsafe extern "C" fn(*mut light_device_enumerator_t) -> bool,
->;
+pub type LFUNCENUMFREE = Option<unsafe extern "C" fn(*mut light_device_enumerator_t) -> bool>;
+pub type LFUNCENUMINIT = Option<unsafe extern "C" fn(*mut light_device_enumerator_t) -> bool>;
 pub type light_device_target_t = _light_device_target_t;
-pub type LFUNCCUSTOMCMD = Option::<
-    unsafe extern "C" fn(*mut light_device_target_t, *const libc::c_char) -> bool,
->;
-pub type LFUNCMAXVALGET = Option::<
-    unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
->;
-pub type LFUNCVALGET = Option::<
-    unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
->;
-pub type LFUNCVALSET = Option::<
-    unsafe extern "C" fn(*mut light_device_target_t, uint64_t) -> bool,
->;
+pub type LFUNCCUSTOMCMD =
+    Option<unsafe extern "C" fn(*mut light_device_target_t, *const libc::c_char) -> bool>;
+pub type LFUNCMAXVALGET =
+    Option<unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool>;
+pub type LFUNCVALGET =
+    Option<unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool>;
+pub type LFUNCVALSET = Option<unsafe extern "C" fn(*mut light_device_target_t, uint64_t) -> bool>;
 pub type FILE = _IO_FILE;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -116,9 +107,7 @@ pub type light_loglevel_t = libc::c_uint;
 pub const LIGHT_WARN_LEVEL: light_loglevel_t = 2;
 pub const LIGHT_ERROR_LEVEL: light_loglevel_t = 1;
 #[no_mangle]
-pub unsafe extern "C" fn impl_util_init(
-    mut enumerator: *mut light_device_enumerator_t,
-) -> bool {
+pub unsafe extern "C" fn impl_util_init(mut enumerator: *mut light_device_enumerator_t) -> bool {
     let mut util_device: *mut light_device_t = light_create_device(
         enumerator,
         b"test\0" as *const u8 as *const libc::c_char,
@@ -133,33 +122,22 @@ pub unsafe extern "C" fn impl_util_init(
         ),
         Some(
             impl_util_dryrun_get
-                as unsafe extern "C" fn(
-                    *mut light_device_target_t,
-                    *mut uint64_t,
-                ) -> bool,
+                as unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
         ),
         Some(
             impl_util_dryrun_getmax
-                as unsafe extern "C" fn(
-                    *mut light_device_target_t,
-                    *mut uint64_t,
-                ) -> bool,
+                as unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
         ),
         Some(
             impl_util_dryrun_command
-                as unsafe extern "C" fn(
-                    *mut light_device_target_t,
-                    *const libc::c_char,
-                ) -> bool,
+                as unsafe extern "C" fn(*mut light_device_target_t, *const libc::c_char) -> bool,
         ),
         0 as *mut libc::c_void,
     );
     return 1 as libc::c_int != 0;
 }
 #[no_mangle]
-pub unsafe extern "C" fn impl_util_free(
-    mut enumerator: *mut light_device_enumerator_t,
-) -> bool {
+pub unsafe extern "C" fn impl_util_free(mut enumerator: *mut light_device_enumerator_t) -> bool {
     return 1 as libc::c_int != 0;
 }
 #[no_mangle]
@@ -167,8 +145,7 @@ pub unsafe extern "C" fn impl_util_dryrun_set(
     mut target: *mut light_device_target_t,
     mut in_value: uint64_t,
 ) -> bool {
-    if light_loglevel as libc::c_uint >= LIGHT_NOTE_LEVEL as libc::c_int as libc::c_uint
-    {
+    if light_loglevel as libc::c_uint >= LIGHT_NOTE_LEVEL as libc::c_int as libc::c_uint {
         fprintf(
             stdout,
             b"%s:%d: Notice: impl_util_dryrun_set: writing brightness %lu to utility target %s\n\0"
@@ -186,8 +163,7 @@ pub unsafe extern "C" fn impl_util_dryrun_get(
     mut target: *mut light_device_target_t,
     mut out_value: *mut uint64_t,
 ) -> bool {
-    if light_loglevel as libc::c_uint >= LIGHT_NOTE_LEVEL as libc::c_int as libc::c_uint
-    {
+    if light_loglevel as libc::c_uint >= LIGHT_NOTE_LEVEL as libc::c_int as libc::c_uint {
         fprintf(
             stdout,
             b"%s:%d: Notice: impl_util_dryrun_get: reading brightness (0) from utility target %s\n\0"
@@ -205,8 +181,7 @@ pub unsafe extern "C" fn impl_util_dryrun_getmax(
     mut target: *mut light_device_target_t,
     mut out_value: *mut uint64_t,
 ) -> bool {
-    if light_loglevel as libc::c_uint >= LIGHT_NOTE_LEVEL as libc::c_int as libc::c_uint
-    {
+    if light_loglevel as libc::c_uint >= LIGHT_NOTE_LEVEL as libc::c_int as libc::c_uint {
         fprintf(
             stdout,
             b"%s:%d: Notice: impl_util_dryrun_getmax: reading max. brightness (255) from utility target %s\n\0"
@@ -224,8 +199,7 @@ pub unsafe extern "C" fn impl_util_dryrun_command(
     mut target: *mut light_device_target_t,
     mut command_string: *const libc::c_char,
 ) -> bool {
-    if light_loglevel as libc::c_uint >= LIGHT_NOTE_LEVEL as libc::c_int as libc::c_uint
-    {
+    if light_loglevel as libc::c_uint >= LIGHT_NOTE_LEVEL as libc::c_int as libc::c_uint {
         fprintf(
             stdout,
             b"%s:%d: Notice: impl_util_dryrun_command: running custom command on utility target %s: \"%s\"\n\0"

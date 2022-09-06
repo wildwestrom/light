@@ -9,14 +9,13 @@
 #![feature(register_tool)]
 #![register_tool(c2rust)]
 
-
 extern crate libc;
 pub mod src {
-pub mod helpers;
-pub mod light;
-pub mod r#impl {
-pub mod razer;
-pub mod sysfs;
-pub mod util;
-} // mod r#impl
+    pub mod helpers;
+    pub mod light;
+    pub mod r#impl {
+        pub mod razer;
+        pub mod sysfs;
+        pub mod util;
+    } // mod r#impl
 } // mod src

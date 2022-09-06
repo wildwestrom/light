@@ -1,4 +1,12 @@
-#![allow(dead_code, mutable_transmutes, non_camel_case_types, non_snake_case, non_upper_case_globals, unused_assignments, unused_mut)]
+#![allow(
+    dead_code,
+    mutable_transmutes,
+    non_camel_case_types,
+    non_snake_case,
+    non_upper_case_globals,
+    unused_assignments,
+    unused_mut
+)]
 #![register_tool(c2rust)]
 #![feature(extern_types, register_tool)]
 use ::c2rust_out::*;
@@ -6,10 +14,7 @@ extern "C" {
     pub type _IO_wide_data;
     pub type _IO_codecvt;
     pub type _IO_marker;
-    fn light_initialize(
-        argc: libc::c_int,
-        argv: *mut *mut libc::c_char,
-    ) -> *mut light_context_t;
+    fn light_initialize(argc: libc::c_int, argv: *mut *mut libc::c_char) -> *mut light_context_t;
     fn light_execute(_: *mut light_context_t) -> bool;
     fn light_free(_: *mut light_context_t);
     static mut stderr: *mut FILE;
@@ -52,25 +57,16 @@ pub struct _light_device_enumerator_t {
     pub devices: *mut *mut light_device_t,
     pub num_devices: uint64_t,
 }
-pub type LFUNCENUMFREE = Option::<
-    unsafe extern "C" fn(*mut light_device_enumerator_t) -> bool,
->;
-pub type LFUNCENUMINIT = Option::<
-    unsafe extern "C" fn(*mut light_device_enumerator_t) -> bool,
->;
+pub type LFUNCENUMFREE = Option<unsafe extern "C" fn(*mut light_device_enumerator_t) -> bool>;
+pub type LFUNCENUMINIT = Option<unsafe extern "C" fn(*mut light_device_enumerator_t) -> bool>;
 pub type light_device_target_t = _light_device_target_t;
-pub type LFUNCCUSTOMCMD = Option::<
-    unsafe extern "C" fn(*mut light_device_target_t, *const libc::c_char) -> bool,
->;
-pub type LFUNCMAXVALGET = Option::<
-    unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
->;
-pub type LFUNCVALGET = Option::<
-    unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
->;
-pub type LFUNCVALSET = Option::<
-    unsafe extern "C" fn(*mut light_device_target_t, uint64_t) -> bool,
->;
+pub type LFUNCCUSTOMCMD =
+    Option<unsafe extern "C" fn(*mut light_device_target_t, *const libc::c_char) -> bool>;
+pub type LFUNCMAXVALGET =
+    Option<unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool>;
+pub type LFUNCVALGET =
+    Option<unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool>;
+pub type LFUNCVALSET = Option<unsafe extern "C" fn(*mut light_device_target_t, uint64_t) -> bool>;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _light_context_t {
@@ -93,7 +89,7 @@ pub struct C2RustUnnamed_0 {
     pub raw_mode: bool,
     pub device_target: *mut light_device_target_t,
 }
-pub type LFUNCCOMMAND = Option::<unsafe extern "C" fn(*mut light_context_t) -> bool>;
+pub type LFUNCCOMMAND = Option<unsafe extern "C" fn(*mut light_context_t) -> bool>;
 pub type light_context_t = _light_context_t;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -134,19 +130,13 @@ pub type light_loglevel_t = libc::c_uint;
 pub const LIGHT_NOTE_LEVEL: light_loglevel_t = 3;
 pub const LIGHT_WARN_LEVEL: light_loglevel_t = 2;
 pub const LIGHT_ERROR_LEVEL: light_loglevel_t = 1;
-unsafe fn main_0(
-    mut argc: libc::c_int,
-    mut argv: *mut *mut libc::c_char,
-) -> libc::c_int {
+unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> libc::c_int {
     let mut light_ctx: *mut light_context_t = light_initialize(argc, argv);
     if light_ctx.is_null() {
-        if light_loglevel as libc::c_uint
-            >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint
-        {
+        if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             fprintf(
                 stderr,
-                b"%s:%d: Error: Initialization failed\n\0" as *const u8
-                    as *const libc::c_char,
+                b"%s:%d: Error: Initialization failed\n\0" as *const u8 as *const libc::c_char,
                 b"main.c\0" as *const u8 as *const libc::c_char,
                 15 as libc::c_int,
             );
@@ -154,13 +144,10 @@ unsafe fn main_0(
         return 2 as libc::c_int;
     }
     if !light_execute(light_ctx) {
-        if light_loglevel as libc::c_uint
-            >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint
-        {
+        if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             fprintf(
                 stderr,
-                b"%s:%d: Error: Execution failed\n\0" as *const u8
-                    as *const libc::c_char,
+                b"%s:%d: Error: Execution failed\n\0" as *const u8 as *const libc::c_char,
                 b"main.c\0" as *const u8 as *const libc::c_char,
                 20 as libc::c_int,
             );
@@ -172,7 +159,7 @@ unsafe fn main_0(
     return 0 as libc::c_int;
 }
 pub fn main() {
-    let mut args: Vec::<*mut libc::c_char> = Vec::new();
+    let mut args: Vec<*mut libc::c_char> = Vec::new();
     for arg in ::std::env::args() {
         args.push(
             (::std::ffi::CString::new(arg))
@@ -182,11 +169,9 @@ pub fn main() {
     }
     args.push(::std::ptr::null_mut());
     unsafe {
-        ::std::process::exit(
-            main_0(
-                (args.len() - 1) as libc::c_int,
-                args.as_mut_ptr() as *mut *mut libc::c_char,
-            ) as i32,
-        )
+        ::std::process::exit(main_0(
+            (args.len() - 1) as libc::c_int,
+            args.as_mut_ptr() as *mut *mut libc::c_char,
+        ) as i32)
     }
 }

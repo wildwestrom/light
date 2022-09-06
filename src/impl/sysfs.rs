@@ -71,25 +71,16 @@ pub struct _light_device_enumerator_t {
     pub devices: *mut *mut light_device_t,
     pub num_devices: uint64_t,
 }
-pub type LFUNCENUMFREE = Option::<
-    unsafe extern "C" fn(*mut light_device_enumerator_t) -> bool,
->;
-pub type LFUNCENUMINIT = Option::<
-    unsafe extern "C" fn(*mut light_device_enumerator_t) -> bool,
->;
+pub type LFUNCENUMFREE = Option<unsafe extern "C" fn(*mut light_device_enumerator_t) -> bool>;
+pub type LFUNCENUMINIT = Option<unsafe extern "C" fn(*mut light_device_enumerator_t) -> bool>;
 pub type light_device_target_t = _light_device_target_t;
-pub type LFUNCCUSTOMCMD = Option::<
-    unsafe extern "C" fn(*mut light_device_target_t, *const libc::c_char) -> bool,
->;
-pub type LFUNCMAXVALGET = Option::<
-    unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
->;
-pub type LFUNCVALGET = Option::<
-    unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
->;
-pub type LFUNCVALSET = Option::<
-    unsafe extern "C" fn(*mut light_device_target_t, uint64_t) -> bool,
->;
+pub type LFUNCCUSTOMCMD =
+    Option<unsafe extern "C" fn(*mut light_device_target_t, *const libc::c_char) -> bool>;
+pub type LFUNCMAXVALGET =
+    Option<unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool>;
+pub type LFUNCVALGET =
+    Option<unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool>;
+pub type LFUNCVALSET = Option<unsafe extern "C" fn(*mut light_device_target_t, uint64_t) -> bool>;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _impl_sysfs_data_t {
@@ -146,9 +137,7 @@ pub struct dirent {
     pub d_type: libc::c_uchar,
     pub d_name: [libc::c_char; 256],
 }
-unsafe extern "C" fn _impl_sysfs_init_leds(
-    mut enumerator: *mut light_device_enumerator_t,
-) -> bool {
+unsafe extern "C" fn _impl_sysfs_init_leds(mut enumerator: *mut light_device_enumerator_t) -> bool {
     let mut leds_device: *mut light_device_t = light_create_device(
         enumerator,
         b"leds\0" as *const u8 as *const libc::c_char,
@@ -158,9 +147,7 @@ unsafe extern "C" fn _impl_sysfs_init_leds(
     let mut curr_entry: *mut dirent = 0 as *mut dirent;
     leds_dir = opendir(b"/sys/class/leds\0" as *const u8 as *const libc::c_char);
     if leds_dir.is_null() {
-        if light_loglevel as libc::c_uint
-            >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint
-        {
+        if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             fprintf(
                 stderr,
                 b"%s:%d: Error: failed to open leds controller directory for reading\n\0"
@@ -179,9 +166,9 @@ unsafe extern "C" fn _impl_sysfs_init_leds(
         if (*curr_entry).d_name[0 as libc::c_int as usize] as libc::c_int == '.' as i32 {
             continue;
         }
-        let mut dev_data: *mut impl_sysfs_data_t = malloc(
-            ::std::mem::size_of::<impl_sysfs_data_t>() as libc::c_ulong,
-        ) as *mut impl_sysfs_data_t;
+        let mut dev_data: *mut impl_sysfs_data_t =
+            malloc(::std::mem::size_of::<impl_sysfs_data_t>() as libc::c_ulong)
+                as *mut impl_sysfs_data_t;
         snprintf(
             ((*dev_data).brightness).as_mut_ptr(),
             ::std::mem::size_of::<[libc::c_char; 255]>() as libc::c_ulong,
@@ -203,17 +190,11 @@ unsafe extern "C" fn _impl_sysfs_init_leds(
             ),
             Some(
                 impl_sysfs_get
-                    as unsafe extern "C" fn(
-                        *mut light_device_target_t,
-                        *mut uint64_t,
-                    ) -> bool,
+                    as unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
             ),
             Some(
                 impl_sysfs_getmax
-                    as unsafe extern "C" fn(
-                        *mut light_device_target_t,
-                        *mut uint64_t,
-                    ) -> bool,
+                    as unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
             ),
             Some(
                 impl_sysfs_command
@@ -240,13 +221,9 @@ unsafe extern "C" fn _impl_sysfs_init_backlight(
     let mut curr_entry: *mut dirent = 0 as *mut dirent;
     let mut best_controller: [libc::c_char; 255] = [0; 255];
     let mut best_value: uint64_t = 0 as libc::c_int as uint64_t;
-    backlight_dir = opendir(
-        b"/sys/class/backlight\0" as *const u8 as *const libc::c_char,
-    );
+    backlight_dir = opendir(b"/sys/class/backlight\0" as *const u8 as *const libc::c_char);
     if backlight_dir.is_null() {
-        if light_loglevel as libc::c_uint
-            >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint
-        {
+        if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             fprintf(
                 stderr,
                 b"%s:%d: Error: failed to open backlight controller directory for reading\n\0"
@@ -265,9 +242,9 @@ unsafe extern "C" fn _impl_sysfs_init_backlight(
         if (*curr_entry).d_name[0 as libc::c_int as usize] as libc::c_int == '.' as i32 {
             continue;
         }
-        let mut dev_data: *mut impl_sysfs_data_t = malloc(
-            ::std::mem::size_of::<impl_sysfs_data_t>() as libc::c_ulong,
-        ) as *mut impl_sysfs_data_t;
+        let mut dev_data: *mut impl_sysfs_data_t =
+            malloc(::std::mem::size_of::<impl_sysfs_data_t>() as libc::c_ulong)
+                as *mut impl_sysfs_data_t;
         snprintf(
             ((*dev_data).brightness).as_mut_ptr(),
             ::std::mem::size_of::<[libc::c_char; 255]>() as libc::c_ulong,
@@ -277,8 +254,7 @@ unsafe extern "C" fn _impl_sysfs_init_backlight(
         snprintf(
             ((*dev_data).max_brightness).as_mut_ptr(),
             ::std::mem::size_of::<[libc::c_char; 255]>() as libc::c_ulong,
-            b"/sys/class/backlight/%s/max_brightness\0" as *const u8
-                as *const libc::c_char,
+            b"/sys/class/backlight/%s/max_brightness\0" as *const u8 as *const libc::c_char,
             ((*curr_entry).d_name).as_mut_ptr(),
         );
         light_create_device_target(
@@ -290,17 +266,11 @@ unsafe extern "C" fn _impl_sysfs_init_backlight(
             ),
             Some(
                 impl_sysfs_get
-                    as unsafe extern "C" fn(
-                        *mut light_device_target_t,
-                        *mut uint64_t,
-                    ) -> bool,
+                    as unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
             ),
             Some(
                 impl_sysfs_getmax
-                    as unsafe extern "C" fn(
-                        *mut light_device_target_t,
-                        *mut uint64_t,
-                    ) -> bool,
+                    as unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
             ),
             Some(
                 impl_sysfs_command
@@ -312,10 +282,7 @@ unsafe extern "C" fn _impl_sysfs_init_backlight(
             dev_data as *mut libc::c_void,
         );
         let mut curr_value: uint64_t = 0 as libc::c_int as uint64_t;
-        if light_file_read_uint64(
-            ((*dev_data).max_brightness).as_mut_ptr(),
-            &mut curr_value,
-        ) {
+        if light_file_read_uint64(((*dev_data).max_brightness).as_mut_ptr(), &mut curr_value) {
             if curr_value > best_value {
                 best_value = curr_value;
                 snprintf(
@@ -329,9 +296,9 @@ unsafe extern "C" fn _impl_sysfs_init_backlight(
     }
     closedir(backlight_dir);
     if best_value > 0 as libc::c_int as libc::c_ulong {
-        let mut dev_data_0: *mut impl_sysfs_data_t = malloc(
-            ::std::mem::size_of::<impl_sysfs_data_t>() as libc::c_ulong,
-        ) as *mut impl_sysfs_data_t;
+        let mut dev_data_0: *mut impl_sysfs_data_t =
+            malloc(::std::mem::size_of::<impl_sysfs_data_t>() as libc::c_ulong)
+                as *mut impl_sysfs_data_t;
         snprintf(
             ((*dev_data_0).brightness).as_mut_ptr(),
             ::std::mem::size_of::<[libc::c_char; 255]>() as libc::c_ulong,
@@ -341,8 +308,7 @@ unsafe extern "C" fn _impl_sysfs_init_backlight(
         snprintf(
             ((*dev_data_0).max_brightness).as_mut_ptr(),
             ::std::mem::size_of::<[libc::c_char; 255]>() as libc::c_ulong,
-            b"/sys/class/backlight/%s/max_brightness\0" as *const u8
-                as *const libc::c_char,
+            b"/sys/class/backlight/%s/max_brightness\0" as *const u8 as *const libc::c_char,
             best_controller.as_mut_ptr(),
         );
         light_create_device_target(
@@ -354,17 +320,11 @@ unsafe extern "C" fn _impl_sysfs_init_backlight(
             ),
             Some(
                 impl_sysfs_get
-                    as unsafe extern "C" fn(
-                        *mut light_device_target_t,
-                        *mut uint64_t,
-                    ) -> bool,
+                    as unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
             ),
             Some(
                 impl_sysfs_getmax
-                    as unsafe extern "C" fn(
-                        *mut light_device_target_t,
-                        *mut uint64_t,
-                    ) -> bool,
+                    as unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
             ),
             Some(
                 impl_sysfs_command
@@ -379,17 +339,13 @@ unsafe extern "C" fn _impl_sysfs_init_backlight(
     return 1 as libc::c_int != 0;
 }
 #[no_mangle]
-pub unsafe extern "C" fn impl_sysfs_init(
-    mut enumerator: *mut light_device_enumerator_t,
-) -> bool {
+pub unsafe extern "C" fn impl_sysfs_init(mut enumerator: *mut light_device_enumerator_t) -> bool {
     _impl_sysfs_init_backlight(enumerator);
     _impl_sysfs_init_leds(enumerator);
     return 1 as libc::c_int != 0;
 }
 #[no_mangle]
-pub unsafe extern "C" fn impl_sysfs_free(
-    mut enumerator: *mut light_device_enumerator_t,
-) -> bool {
+pub unsafe extern "C" fn impl_sysfs_free(mut enumerator: *mut light_device_enumerator_t) -> bool {
     return 1 as libc::c_int != 0;
 }
 #[no_mangle]
@@ -397,12 +353,9 @@ pub unsafe extern "C" fn impl_sysfs_set(
     mut target: *mut light_device_target_t,
     mut in_value: uint64_t,
 ) -> bool {
-    let mut data: *mut impl_sysfs_data_t = (*target).device_target_data
-        as *mut impl_sysfs_data_t;
+    let mut data: *mut impl_sysfs_data_t = (*target).device_target_data as *mut impl_sysfs_data_t;
     if !light_file_write_uint64(((*data).brightness).as_mut_ptr(), in_value) {
-        if light_loglevel as libc::c_uint
-            >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint
-        {
+        if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             fprintf(
                 stderr,
                 b"%s:%d: Error: failed to write to sysfs device\n\0" as *const u8
@@ -420,12 +373,9 @@ pub unsafe extern "C" fn impl_sysfs_get(
     mut target: *mut light_device_target_t,
     mut out_value: *mut uint64_t,
 ) -> bool {
-    let mut data: *mut impl_sysfs_data_t = (*target).device_target_data
-        as *mut impl_sysfs_data_t;
+    let mut data: *mut impl_sysfs_data_t = (*target).device_target_data as *mut impl_sysfs_data_t;
     if !light_file_read_uint64(((*data).brightness).as_mut_ptr(), out_value) {
-        if light_loglevel as libc::c_uint
-            >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint
-        {
+        if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             fprintf(
                 stderr,
                 b"%s:%d: Error: failed to read from sysfs device\n\0" as *const u8
@@ -443,12 +393,9 @@ pub unsafe extern "C" fn impl_sysfs_getmax(
     mut target: *mut light_device_target_t,
     mut out_value: *mut uint64_t,
 ) -> bool {
-    let mut data: *mut impl_sysfs_data_t = (*target).device_target_data
-        as *mut impl_sysfs_data_t;
+    let mut data: *mut impl_sysfs_data_t = (*target).device_target_data as *mut impl_sysfs_data_t;
     if !light_file_read_uint64(((*data).max_brightness).as_mut_ptr(), out_value) {
-        if light_loglevel as libc::c_uint
-            >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint
-        {
+        if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             fprintf(
                 stderr,
                 b"%s:%d: Error: failed to read from sysfs device\n\0" as *const u8

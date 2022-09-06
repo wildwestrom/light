@@ -73,25 +73,16 @@ pub struct _light_device_enumerator_t {
     pub devices: *mut *mut light_device_t,
     pub num_devices: uint64_t,
 }
-pub type LFUNCENUMFREE = Option::<
-    unsafe extern "C" fn(*mut light_device_enumerator_t) -> bool,
->;
-pub type LFUNCENUMINIT = Option::<
-    unsafe extern "C" fn(*mut light_device_enumerator_t) -> bool,
->;
+pub type LFUNCENUMFREE = Option<unsafe extern "C" fn(*mut light_device_enumerator_t) -> bool>;
+pub type LFUNCENUMINIT = Option<unsafe extern "C" fn(*mut light_device_enumerator_t) -> bool>;
 pub type light_device_target_t = _light_device_target_t;
-pub type LFUNCCUSTOMCMD = Option::<
-    unsafe extern "C" fn(*mut light_device_target_t, *const libc::c_char) -> bool,
->;
-pub type LFUNCMAXVALGET = Option::<
-    unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
->;
-pub type LFUNCVALGET = Option::<
-    unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
->;
-pub type LFUNCVALSET = Option::<
-    unsafe extern "C" fn(*mut light_device_target_t, uint64_t) -> bool,
->;
+pub type LFUNCCUSTOMCMD =
+    Option<unsafe extern "C" fn(*mut light_device_target_t, *const libc::c_char) -> bool>;
+pub type LFUNCMAXVALGET =
+    Option<unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool>;
+pub type LFUNCVALGET =
+    Option<unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool>;
+pub type LFUNCVALSET = Option<unsafe extern "C" fn(*mut light_device_target_t, uint64_t) -> bool>;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _impl_razer_data_t {
@@ -154,9 +145,9 @@ unsafe extern "C" fn _impl_razer_add_target(
     mut filename: *const libc::c_char,
     mut max_brightness: uint64_t,
 ) {
-    let mut target_data: *mut impl_razer_data_t = malloc(
-        ::std::mem::size_of::<impl_razer_data_t>() as libc::c_ulong,
-    ) as *mut impl_razer_data_t;
+    let mut target_data: *mut impl_razer_data_t =
+        malloc(::std::mem::size_of::<impl_razer_data_t>() as libc::c_ulong)
+            as *mut impl_razer_data_t;
     snprintf(
         ((*target_data).brightness).as_mut_ptr(),
         ::std::mem::size_of::<[libc::c_char; 255]>() as libc::c_ulong,
@@ -175,17 +166,11 @@ unsafe extern "C" fn _impl_razer_add_target(
             ),
             Some(
                 impl_razer_get
-                    as unsafe extern "C" fn(
-                        *mut light_device_target_t,
-                        *mut uint64_t,
-                    ) -> bool,
+                    as unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
             ),
             Some(
                 impl_razer_getmax
-                    as unsafe extern "C" fn(
-                        *mut light_device_target_t,
-                        *mut uint64_t,
-                    ) -> bool,
+                    as unsafe extern "C" fn(*mut light_device_target_t, *mut uint64_t) -> bool,
             ),
             Some(
                 impl_razer_command
@@ -197,9 +182,7 @@ unsafe extern "C" fn _impl_razer_add_target(
             target_data as *mut libc::c_void,
         );
     } else {
-        if light_loglevel as libc::c_uint
-            >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint
-        {
+        if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
             fprintf(
                 stderr,
                 b"%s:%d: Warning: razer: couldn't add target %s to device %s, the file %s doesn't exist\n\0"
@@ -218,11 +201,8 @@ unsafe extern "C" fn _impl_razer_add_device(
     mut enumerator: *mut light_device_enumerator_t,
     mut device_id: *const libc::c_char,
 ) {
-    let mut new_device: *mut light_device_t = light_create_device(
-        enumerator,
-        device_id,
-        0 as *mut libc::c_void,
-    );
+    let mut new_device: *mut light_device_t =
+        light_create_device(enumerator, device_id, 0 as *mut libc::c_void);
     _impl_razer_add_target(
         new_device,
         b"backlight\0" as *const u8 as *const libc::c_char,
@@ -267,14 +247,10 @@ unsafe extern "C" fn _impl_razer_add_device(
     );
 }
 #[no_mangle]
-pub unsafe extern "C" fn impl_razer_init(
-    mut enumerator: *mut light_device_enumerator_t,
-) -> bool {
+pub unsafe extern "C" fn impl_razer_init(mut enumerator: *mut light_device_enumerator_t) -> bool {
     let mut razer_dir: *mut DIR = 0 as *mut DIR;
     let mut curr_entry: *mut dirent = 0 as *mut dirent;
-    razer_dir = opendir(
-        b"/sys/bus/hid/drivers/razerkbd/\0" as *const u8 as *const libc::c_char,
-    );
+    razer_dir = opendir(b"/sys/bus/hid/drivers/razerkbd/\0" as *const u8 as *const libc::c_char);
     if razer_dir.is_null() {
         return 1 as libc::c_int != 0;
     }
@@ -292,9 +268,7 @@ pub unsafe extern "C" fn impl_razer_init(
     return 1 as libc::c_int != 0;
 }
 #[no_mangle]
-pub unsafe extern "C" fn impl_razer_free(
-    mut enumerator: *mut light_device_enumerator_t,
-) -> bool {
+pub unsafe extern "C" fn impl_razer_free(mut enumerator: *mut light_device_enumerator_t) -> bool {
     return 1 as libc::c_int != 0;
 }
 #[no_mangle]
@@ -302,12 +276,9 @@ pub unsafe extern "C" fn impl_razer_set(
     mut target: *mut light_device_target_t,
     mut in_value: uint64_t,
 ) -> bool {
-    let mut data: *mut impl_razer_data_t = (*target).device_target_data
-        as *mut impl_razer_data_t;
+    let mut data: *mut impl_razer_data_t = (*target).device_target_data as *mut impl_razer_data_t;
     if !light_file_write_uint64(((*data).brightness).as_mut_ptr(), in_value) {
-        if light_loglevel as libc::c_uint
-            >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint
-        {
+        if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             fprintf(
                 stderr,
                 b"%s:%d: Error: failed to write to razer device\n\0" as *const u8
@@ -325,12 +296,9 @@ pub unsafe extern "C" fn impl_razer_get(
     mut target: *mut light_device_target_t,
     mut out_value: *mut uint64_t,
 ) -> bool {
-    let mut data: *mut impl_razer_data_t = (*target).device_target_data
-        as *mut impl_razer_data_t;
+    let mut data: *mut impl_razer_data_t = (*target).device_target_data as *mut impl_razer_data_t;
     if !light_file_read_uint64(((*data).brightness).as_mut_ptr(), out_value) {
-        if light_loglevel as libc::c_uint
-            >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint
-        {
+        if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             fprintf(
                 stderr,
                 b"%s:%d: Error: failed to read from razer device\n\0" as *const u8
@@ -348,8 +316,7 @@ pub unsafe extern "C" fn impl_razer_getmax(
     mut target: *mut light_device_target_t,
     mut out_value: *mut uint64_t,
 ) -> bool {
-    let mut data: *mut impl_razer_data_t = (*target).device_target_data
-        as *mut impl_razer_data_t;
+    let mut data: *mut impl_razer_data_t = (*target).device_target_data as *mut impl_razer_data_t;
     *out_value = (*data).max_brightness;
     return 1 as libc::c_int != 0;
 }
