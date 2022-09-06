@@ -110,8 +110,6 @@ pub unsafe extern "C" fn light_file_read_uint64(
     if fp.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             eprintln!("Error: could not open '{:?}' for reading", filename,);
-        }
-        if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             eprintln!("Error: Verify it exists with the right permissions");
         }
         return 0 as libc::c_int != 0;
@@ -142,8 +140,6 @@ pub unsafe extern "C" fn light_file_write_uint64(
     if fp.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             eprintln!("Error: could not open '{:?}' for writing", filename,);
-        }
-        if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             eprintln!("Error: Verify it exists with the right permissions");
         }
         return 0 as libc::c_int != 0;
@@ -168,9 +164,7 @@ pub unsafe extern "C" fn light_file_is_writable(mut filename: *const libc::c_cha
     fp = fopen(filename, b"r+\0" as *const u8 as *const libc::c_char);
     if fp.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            eprintln!("Warning: could not open '{:?}' for writing", filename)
-        }
-        if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
+            eprintln!("Warning: could not open '{:?}' for writing", filename);
             eprintln!("Error: Verify it exists with the right permissions");
         }
         return 0 as libc::c_int != 0;
@@ -184,9 +178,7 @@ pub unsafe extern "C" fn light_file_is_readable(mut filename: *const libc::c_cha
     fp = fopen(filename, b"r\0" as *const u8 as *const libc::c_char);
     if fp.is_null() {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
-            eprintln!("Warning: could not open '{:?}' for reading", filename)
-        }
-        if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
+            eprintln!("Warning: could not open '{:?}' for reading", filename);
             eprintln!("Error: Verify it exists with the right permissions");
         }
         return 0 as libc::c_int != 0;
@@ -198,7 +190,7 @@ pub unsafe extern "C" fn light_file_is_readable(mut filename: *const libc::c_cha
 pub unsafe extern "C" fn light_log_clamp_min(mut min: uint64_t) -> uint64_t {
     if light_loglevel as libc::c_uint >= LIGHT_NOTE_LEVEL as libc::c_int as libc::c_uint {
         println!(
-            "Notice: too small value, adjusting to minimum {:?} (raw)",
+            "Notice: too small value, adjusting to minimum {} (raw)",
             min,
         );
     }
@@ -208,7 +200,7 @@ pub unsafe extern "C" fn light_log_clamp_min(mut min: uint64_t) -> uint64_t {
 pub unsafe extern "C" fn light_log_clamp_max(mut max: uint64_t) -> uint64_t {
     if light_loglevel as libc::c_uint >= LIGHT_NOTE_LEVEL as libc::c_int as libc::c_uint {
         println!(
-            "Notice: too large value, adjusting to maximum {:?} (raw)",
+            "Notice: too large value, adjusting to maximum {} (raw)",
             max,
         );
     }
@@ -219,7 +211,7 @@ pub unsafe extern "C" fn light_percent_clamp(mut val: libc::c_double) -> libc::c
     if val < 0.0f64 {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
             eprintln!(
-                "Warning: specified value {:?}% is not valid, adjusting it to 0%",
+                "Warning: specified value {}% is not valid, adjusting it to 0%",
                 val,
             );
         }
@@ -228,7 +220,7 @@ pub unsafe extern "C" fn light_percent_clamp(mut val: libc::c_double) -> libc::c
     if val > 100.0f64 {
         if light_loglevel as libc::c_uint >= LIGHT_WARN_LEVEL as libc::c_int as libc::c_uint {
             eprintln!(
-                "Warning: specified value {:?}% is not valid, adjusting it to 100%",
+                "Warning: specified value {}% is not valid, adjusting it to 100%",
                 val,
             );
         }
