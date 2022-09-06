@@ -247,7 +247,7 @@ pub unsafe extern "C" fn impl_razer_init(mut enumerator: *mut light_device_enume
     let mut curr_entry: *mut dirent = 0 as *mut dirent;
     razer_dir = opendir(b"/sys/bus/hid/drivers/razerkbd/\0" as *const u8 as *const libc::c_char);
     if razer_dir.is_null() {
-        return 1 as libc::c_int != 0;
+        return true
     }
     loop {
         curr_entry = readdir(razer_dir);
@@ -260,11 +260,11 @@ pub unsafe extern "C" fn impl_razer_init(mut enumerator: *mut light_device_enume
         _impl_razer_add_device(enumerator, ((*curr_entry).d_name).as_mut_ptr());
     }
     closedir(razer_dir);
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn impl_razer_free(mut enumerator: *mut light_device_enumerator_t) -> bool {
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn impl_razer_set(
@@ -276,9 +276,9 @@ pub unsafe extern "C" fn impl_razer_set(
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             eprintln!("Error: failed to write to razer device",);
         }
-        return 0 as libc::c_int != 0;
+        return false
     }
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn impl_razer_get(
@@ -290,9 +290,9 @@ pub unsafe extern "C" fn impl_razer_get(
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             eprintln!("Error: failed to read from razer device",);
         }
-        return 0 as libc::c_int != 0;
+        return false
     }
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn impl_razer_getmax(
@@ -301,12 +301,12 @@ pub unsafe extern "C" fn impl_razer_getmax(
 ) -> bool {
     let mut data: *mut impl_razer_data_t = (*target).device_target_data as *mut impl_razer_data_t;
     *out_value = (*data).max_brightness;
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn impl_razer_command(
     mut target: *mut light_device_target_t,
     mut command_string: *const libc::c_char,
 ) -> bool {
-    return 1 as libc::c_int != 0;
+    return true
 }

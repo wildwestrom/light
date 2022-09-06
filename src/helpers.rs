@@ -112,7 +112,7 @@ pub unsafe extern "C" fn light_file_read_uint64(
             eprintln!("Error: could not open '{:?}' for reading", filename,);
             eprintln!("Error: Verify it exists with the right permissions");
         }
-        return 0 as libc::c_int != 0;
+        return false
     }
     if fscanf(
         fp,
@@ -124,11 +124,11 @@ pub unsafe extern "C" fn light_file_read_uint64(
             eprintln!("Couldn't parse an unsigned integer from {:?}", filename);
         }
         fclose(fp);
-        return 0 as libc::c_int != 0;
+        return false
     }
     *val = data;
     fclose(fp);
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn light_file_write_uint64(
@@ -142,17 +142,17 @@ pub unsafe extern "C" fn light_file_write_uint64(
             eprintln!("Error: could not open '{:?}' for writing", filename,);
             eprintln!("Error: Verify it exists with the right permissions");
         }
-        return 0 as libc::c_int != 0;
+        return false
     }
     if fprintf(fp, b"%lu\0" as *const u8 as *const libc::c_char, val) < 0 as libc::c_int {
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             eprintln!("Error: fprintf failed")
         }
         fclose(fp);
-        return 0 as libc::c_int != 0;
+        return false
     }
     fclose(fp);
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn light_file_exists(mut filename: *const libc::c_char) -> bool {
@@ -167,10 +167,10 @@ pub unsafe extern "C" fn light_file_is_writable(mut filename: *const libc::c_cha
             eprintln!("Warning: could not open '{:?}' for writing", filename);
             eprintln!("Error: Verify it exists with the right permissions");
         }
-        return 0 as libc::c_int != 0;
+        return false
     }
     fclose(fp);
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn light_file_is_readable(mut filename: *const libc::c_char) -> bool {
@@ -181,10 +181,10 @@ pub unsafe extern "C" fn light_file_is_readable(mut filename: *const libc::c_cha
             eprintln!("Warning: could not open '{:?}' for reading", filename);
             eprintln!("Error: Verify it exists with the right permissions");
         }
-        return 0 as libc::c_int != 0;
+        return false
     }
     fclose(fp);
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn light_log_clamp_min(mut min: uint64_t) -> uint64_t {

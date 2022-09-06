@@ -149,7 +149,7 @@ unsafe extern "C" fn _impl_sysfs_init_leds(mut enumerator: *mut light_device_enu
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             eprintln!("Error: failed to open leds controller directory for reading");
         }
-        return 0 as libc::c_int != 0;
+        return false
     }
     loop {
         curr_entry = readdir(leds_dir);
@@ -200,7 +200,7 @@ unsafe extern "C" fn _impl_sysfs_init_leds(mut enumerator: *mut light_device_enu
         );
     }
     closedir(leds_dir);
-    return 1 as libc::c_int != 0;
+    return true
 }
 unsafe extern "C" fn _impl_sysfs_init_backlight(
     mut enumerator: *mut light_device_enumerator_t,
@@ -219,7 +219,7 @@ unsafe extern "C" fn _impl_sysfs_init_backlight(
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             eprintln!("Error: failed to open backlight controller directory for reading");
         }
-        return 0 as libc::c_int != 0;
+        return false
     }
     loop {
         curr_entry = readdir(backlight_dir);
@@ -323,17 +323,17 @@ unsafe extern "C" fn _impl_sysfs_init_backlight(
             dev_data_0 as *mut libc::c_void,
         );
     }
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn impl_sysfs_init(mut enumerator: *mut light_device_enumerator_t) -> bool {
     _impl_sysfs_init_backlight(enumerator);
     _impl_sysfs_init_leds(enumerator);
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn impl_sysfs_free(mut enumerator: *mut light_device_enumerator_t) -> bool {
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn impl_sysfs_set(
@@ -345,9 +345,9 @@ pub unsafe extern "C" fn impl_sysfs_set(
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             eprintln!("Error: failed to write to sysfs device");
         }
-        return 0 as libc::c_int != 0;
+        return false
     }
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn impl_sysfs_get(
@@ -359,9 +359,9 @@ pub unsafe extern "C" fn impl_sysfs_get(
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             eprintln!("Error: failed to read from sysfs device");
         }
-        return 0 as libc::c_int != 0;
+        return false
     }
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn impl_sysfs_getmax(
@@ -373,14 +373,14 @@ pub unsafe extern "C" fn impl_sysfs_getmax(
         if light_loglevel as libc::c_uint >= LIGHT_ERROR_LEVEL as libc::c_int as libc::c_uint {
             eprintln!("Error: failed to read from sysfs device");
         }
-        return 0 as libc::c_int != 0;
+        return false
     }
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn impl_sysfs_command(
     mut target: *mut light_device_target_t,
     mut command_string: *const libc::c_char,
 ) -> bool {
-    return 1 as libc::c_int != 0;
+    return true
 }

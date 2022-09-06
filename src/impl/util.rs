@@ -133,11 +133,11 @@ pub unsafe extern "C" fn impl_util_init(mut enumerator: *mut light_device_enumer
         ),
         0 as *mut libc::c_void,
     );
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn impl_util_free(mut enumerator: *mut light_device_enumerator_t) -> bool {
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn impl_util_dryrun_set(
@@ -151,7 +151,7 @@ pub unsafe extern "C" fn impl_util_dryrun_set(
             ((*target).name).as_mut_ptr(),
         );
     }
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn impl_util_dryrun_get(
@@ -165,7 +165,7 @@ pub unsafe extern "C" fn impl_util_dryrun_get(
         );
     }
     *out_value = 0 as libc::c_int as uint64_t;
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn impl_util_dryrun_getmax(
@@ -179,7 +179,7 @@ pub unsafe extern "C" fn impl_util_dryrun_getmax(
         );
     }
     *out_value = 255 as libc::c_int as uint64_t;
-    return 1 as libc::c_int != 0;
+    return true
 }
 #[no_mangle]
 pub unsafe extern "C" fn impl_util_dryrun_command(
@@ -193,5 +193,5 @@ pub unsafe extern "C" fn impl_util_dryrun_command(
             command_string,
         );
     }
-    return 1 as libc::c_int != 0;
+    return true
 }
