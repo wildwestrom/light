@@ -125,10 +125,10 @@ pub struct _IO_FILE {
 }
 pub type _IO_lock_t = ();
 pub type FILE = _IO_FILE;
-pub type light_loglevel_t = u32;
-pub const LIGHT_NOTE_LEVEL: u32 = 3;
-pub const LIGHT_WARN_LEVEL: u32 = 2;
-pub const LIGHT_ERROR_LEVEL: u32 = 1;
+pub type light_loglevel_t = libc::c_uint;
+pub const LIGHT_NOTE_LEVEL: light_loglevel_t = 3;
+pub const LIGHT_WARN_LEVEL: light_loglevel_t = 2;
+pub const LIGHT_ERROR_LEVEL: light_loglevel_t = 1;
 unsafe fn main_0(mut argc: libc::c_int, mut argv: *mut *mut libc::c_char) -> libc::c_int {
     let mut light_ctx: *mut light_context_t = light_initialize(argc, argv);
     if light_ctx.is_null() {
